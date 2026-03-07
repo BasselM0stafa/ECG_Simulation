@@ -1,0 +1,4 @@
+# MATLAB/Simulink generated files
+*.slxs
+slprj/
+InAmp.slxc
