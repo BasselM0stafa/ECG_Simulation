@@ -1,6 +1,6 @@
-# ECG Signal Simulation
+# ECG Signal Simulation & Analysis
 
-A MATLAB & Simulink project that mathematically simulates a human ECG signal using a sum of Gaussian functions, with regular and arrhythmic rhythms, physiological noise sources, and instrumentation amplifier modeling.
+A MATLAB & Simulink project that mathematically simulates a human ECG signal using a sum of Gaussian functions, models physiological noises and instrumentation amplifiers, and analyzes real-world ECG data (MIT-BIH) for noise filtering, R-peak detection, and Heart Rate Variability (HRV) stress analysis.
 
 ---
 
@@ -8,52 +8,35 @@ A MATLAB & Simulink project that mathematically simulates a human ECG signal usi
 
 | File | Description |
 |---|---|
-| `regularRythm.mlx` | MATLAB Live Script — clean periodic ECG signal |
-| `irregularRythm.mlx` | MATLAB Live Script — arrhythmic ECG with random beat timing |
-| `InAmp.slx` | Simulink model — ECG with noise sources + amplification |
+| `regularRythm.mlx` | MATLAB Live Script — mathematically simulates a clean periodic ECG signal |
+| `irregularRythm.mlx` | MATLAB Live Script — simulates an arrhythmic ECG with random beat timing |
+| `InAmpCode.slx` & `InAmpCircuit.slx` | Simulink models — add noise, amplify, and optionally filter the signal |
+| `notchfilter.m` | Implements a 50 Hz Notch filter on MIT-BIH data to remove powerline noise |
+| `allfilters.m` | Complete filter pipeline (High-Pass 0.5Hz, Low-Pass 30Hz, Notch 50Hz) |
+| `Rpeaks detected on fully filtered.m` | R-peak detection, HR, and HRV analysis on filtered ECG data |
+| `evaluate.m` | Evaluates R-peak detection precision and recall against MIT-BIH `.atr` annotations |
+| `stress.m` | Calculates HRV metrics (LF/HF, RMSSD) to determine physical stress levels |
 
 ---
 
-## ▶️ How to Run
+## ▶️ Execution Pipeline (How to Run)
 
-### Part 1 — Regular ECG (MATLAB)
+The project follows a linear, step-by-step execution pipeline:
 
-1. Open `regularRythm.mlx` in MATLAB
-2. Press **Run**
-3. Output: time-domain ECG plot + frequency spectrum (dB)
+### Step 1: Generate the Signal
+Run one of the following MATLAB Live Scripts to generate the core ECG signal and load it into your MATLAB workspace:
+- **Regular Rhythm:** Open `regularRythm.mlx` and press **Run**.
+- **Arrhythmia:** Open `irregularRythm.mlx` and press **Run**. *(To fix the randomized pattern, add `rng(42)` before the beat generation).*
 
-> Adjust `duration`, `fs`, and `beat_every` at the top to control simulation length, sampling rate, and beat period.
+### Step 2: Add Noise, Amplify, & Filter (Simulink)
+Once the base signal is in your workspace, process it through one of the Simulink models. The models inject physiological noise (50 Hz powerline, 120 Hz muscle artifact, 0.2 Hz baseline wander).
+- **Option A (Amplify Only):** Open and run `InAmpCode.slx` to add noise and process the signal through an Instrumentation Amplifier stage.
+- **Option B (Amplify & Filter):** Open and run `InAmpCircuit.slx` to add noise, amplify, and additionally run the signal through a filter circuit.
 
----
+*(Press **Run (▶)** in Simulink. You can view the output via the Scope block, and the final processed result is automatically returned to the MATLAB workspace).*
 
-### Part 2 — Arrhythmia ECG (MATLAB)
-
-1. Open `irregularRythm.mlx` in MATLAB
-2. Press **Run**
-3. Output: ECG with randomly spaced beats simulating arrhythmia
-
-> Each run produces a **different** rhythm pattern due to random beat timing.  
-> To fix the pattern, add `rng(42)` before the beat onset generation line.
-
-**Tuning irregularity:** change the `0.8` factor in the `cumsum` line:
-- `0.2` → mild arrhythmia
-- `0.8` → strong arrhythmia
-
----
-
-### Part 3 — Noisy ECG + Amplification (Simulink)
-
-1. Run **Part 1 or Part 2** first to load `ecg_sim` into the workspace
-2. Open `InAmp.slx` in MATLAB:
-   ```matlab
-   open('InAmp.slx')
-   ```
-3. Press **Run (▶)** in Simulink
-4. Open the **Scope** block to view the output
-
-> The model adds three noise sources:
-> - **Powerline** — 50 Hz interference
-> - **Muscle artifact** — 120 Hz high-frequency noise
-> - **Baseline wander** — 0.2 Hz slow drift
->
-> An instrumentation amplifier (InAmp) stage then processes the combined signal.
+### Step 3: Analysis & Visualization (MATLAB)
+With the fully processed result returned to your MATLAB workspace, run the remaining code for plotting and analysis:
+- **Visuals & Spectral Analysis:** Run the rest of the MATLAB code to view time-domain overlays and frequency spectrum responses.
+- **R-Peak & Heart Rate:** Run standard detection steps to calculate the RR interval, detect R-peaks, and output the Heart Rate.
+- **Further Evaluation (Optional):** Use `evaluate.m` or `stress.m` to compute advanced HRV metrics.
