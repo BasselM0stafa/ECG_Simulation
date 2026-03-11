@@ -27,5 +27,6 @@ ylabel('Amplitude (mV)');
 title('Raw ECG Signal - MIT-BIH Record 232');
 grid on;
 
+
 % Zoom in on the first 10 seconds so it looks readable
 xlim([0 10]);
